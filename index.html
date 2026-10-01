@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guided Draw</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <main class="home-screen">
+    <header class="hero">
+      <div class="hero-pencil">✏️</div>
+      <div>
+        <h1>GUIDED DRAW</h1>
+        <p>What should we draw today?</p>
+      </div>
+      <div class="hero-crayon">🖍️</div>
+    </header>
+
+    <section class="level-section easy">
+      <div class="level-heading">
+        <span class="stars">⭐</span>
+        <div>
+          <h2>EASY</h2>
+          <p>Let's Draw!</p>
+        </div>
+      </div>
+
+      <div class="drawing-grid">
+        <button class="drawing-card" data-drawing="fish">
+          <div class="preview fish-preview">🐟</div>
+          <span>FISH</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="flower">
+          <div class="preview flower-preview">🌸</div>
+          <span>FLOWER</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="cat">
+          <div class="preview cat-preview">🐱</div>
+          <span>CAT</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="level-section medium">
+      <div class="level-heading">
+        <span class="stars">⭐⭐</span>
+        <div>
+          <h2>MEDIUM</h2>
+          <p>Make a Scene!</p>
+        </div>
+      </div>
+
+      <div class="drawing-grid">
+        <button class="drawing-card" data-drawing="rocket">
+          <div class="preview rocket-preview">🚀</div>
+          <span>ROCKET</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="house">
+          <div class="preview house-preview">🏠</div>
+          <span>HOUSE</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="butterfly">
+          <div class="preview butterfly-preview">🦋</div>
+          <span>BUTTERFLY</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="level-section hard">
+      <div class="level-heading">
+        <span class="stars">⭐⭐⭐</span>
+        <div>
+          <h2>HARD</h2>
+          <p>Big Pictures!</p>
+        </div>
+      </div>
+
+      <div class="drawing-grid">
+        <button class="drawing-card" data-drawing="dinosaur">
+          <div class="preview dinosaur-preview">🦖</div>
+          <span>DINO ADVENTURE</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="pirate">
+          <div class="preview pirate-preview">🏴‍☠️</div>
+          <span>PIRATE ISLAND</span>
+        </button>
+
+        <button class="drawing-card" data-drawing="castle">
+          <div class="preview castle-preview">🏰</div>
+          <span>CASTLE</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/drawing-engine.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

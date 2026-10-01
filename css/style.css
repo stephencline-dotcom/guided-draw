@@ -1,0 +1,880 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255,255,255,.8), transparent 18%),
+    radial-gradient(circle at 90% 20%, rgba(255,255,255,.65), transparent 17%),
+    linear-gradient(180deg, #78d9ff 0%, #dff7ff 100%);
+  min-height: 100vh;
+  color: #24324a;
+}
+
+button {
+  font: inherit;
+}
+
+.home-screen {
+  width: min(1200px, 96%);
+  margin: 0 auto;
+  padding: 24px 18px 50px;
+}
+
+.hero {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: .95;
+  color: #6438c7;
+  text-shadow:
+    0 4px 0 white,
+    0 7px 0 rgba(0,0,0,.08);
+}
+
+.hero p {
+  margin: 14px 0 0;
+  font-size: clamp(1.15rem, 2.5vw, 1.7rem);
+  font-weight: 800;
+  color: #275171;
+}
+
+.hero-pencil,
+.hero-crayon {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  animation: float 2.6s ease-in-out infinite;
+}
+
+.hero-crayon {
+  animation-delay: .5s;
+}
+
+.level-section {
+  border-radius: 30px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 12px 24px rgba(31, 71, 100, .13);
+  border: 5px solid rgba(255,255,255,.85);
+}
+
+.level-section.easy {
+  background: linear-gradient(135deg, #d7ffd2, #aef0ab);
+}
+
+.level-section.medium {
+  background: linear-gradient(135deg, #fff2a8, #ffd36c);
+}
+
+.level-section.hard {
+  background: linear-gradient(135deg, #ffd0e2, #f3a7d0);
+}
+
+.level-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.stars {
+  font-size: 2rem;
+  background: white;
+  border-radius: 22px;
+  padding: 10px 16px;
+  box-shadow: 0 5px 0 rgba(0,0,0,.08);
+}
+
+.level-heading h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #46336d;
+}
+
+.level-heading p {
+  margin: 3px 0 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.drawing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.drawing-card {
+  border: 0;
+  background: white;
+  border-radius: 26px;
+  padding: 15px;
+  min-height: 220px;
+  cursor: pointer;
+  box-shadow:
+    0 8px 0 rgba(57, 67, 85, .12),
+    0 12px 20px rgba(57, 67, 85, .12);
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+
+.drawing-card:hover {
+  transform: translateY(-7px) scale(1.025);
+  box-shadow:
+    0 12px 0 rgba(57, 67, 85, .1),
+    0 18px 25px rgba(57, 67, 85, .16);
+}
+
+.drawing-card:active {
+  transform: translateY(1px) scale(.98);
+}
+
+.preview {
+  min-height: 155px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  font-size: 6rem;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.fish-preview {
+  background: linear-gradient(#a4e7ff 0 70%, #62c8e8 70%);
+}
+
+.flower-preview {
+  background: linear-gradient(#8fdcff 0 70%, #85d66e 70%);
+}
+
+.cat-preview {
+  background: #efe3ff;
+}
+
+.rocket-preview {
+  background: linear-gradient(#253466, #7657a9);
+}
+
+.house-preview {
+  background: linear-gradient(#7edcff 0 68%, #7ccc63 68%);
+}
+
+.butterfly-preview {
+  background: linear-gradient(#a7e5ff 0 65%, #98db79 65%);
+}
+
+.dinosaur-preview {
+  background: linear-gradient(#ffb167 0 65%, #74a95e 65%);
+}
+
+.pirate-preview {
+  background: linear-gradient(#6ad4f5 0 60%, #1979b4 60%);
+}
+
+.castle-preview {
+  background: linear-gradient(#8fdcff 0 62%, #7cce69 62%);
+}
+
+.drawing-card span {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #3e3561;
+  letter-spacing: .5px;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(4deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .drawing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .drawing-card {
+    min-height: 180px;
+  }
+
+  .preview {
+    min-height: 120px;
+  }
+
+  .hero-pencil,
+  .hero-crayon {
+    display: none;
+  }
+}
+
+/* =========================================================
+   DRAWING STUDIO
+   ========================================================= */
+
+body.studio-mode {
+  overflow: hidden;
+  background: #dff6ff;
+}
+
+body.studio-mode .home-screen {
+  width: 100%;
+  max-width: none;
+  height: 100vh;
+  padding: 0;
+}
+
+.drawing-studio {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 92px minmax(0, 1fr) 126px;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(255,255,255,.85), transparent 22%),
+    linear-gradient(180deg, #c7f0ff, #eefbff);
+}
+
+.studio-header {
+  display: grid;
+  grid-template-columns: 90px 1fr 110px;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 22px;
+  background: white;
+  border-bottom: 5px solid #79d2ef;
+  box-shadow: 0 5px 15px rgba(42, 91, 116, .12);
+  z-index: 5;
+}
+
+.back-button {
+  width: 62px;
+  height: 62px;
+  border: 0;
+  border-radius: 20px;
+  background: #e8f7ff;
+  color: #2d6686;
+  font-size: 2.4rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #b5ddea;
+}
+
+.studio-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.studio-fish {
+  font-size: 3rem;
+}
+
+.studio-title h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.5vw, 2.3rem);
+  color: #5531a7;
+}
+
+.studio-title p {
+  margin: 3px 0 0;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #397390;
+}
+
+.step-counter {
+  justify-self: end;
+  background: #6b43c7;
+  color: white;
+  border-radius: 18px;
+  padding: 12px 18px;
+  font-size: 1.2rem;
+  font-weight: 900;
+  box-shadow: 0 5px 0 #4e2e9d;
+}
+
+.canvas-area {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70px minmax(0, 1fr);
+  padding: 18px 22px;
+}
+
+.canvas-side {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-label {
+  align-self: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -17px;
+  padding: 9px 24px;
+  border-radius: 20px;
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 900;
+  box-shadow: 0 5px 0 rgba(0,0,0,.13);
+}
+
+.watch-label {
+  background: #5b3fbe;
+}
+
+.your-label {
+  background: #ef7d27;
+}
+
+.canvas-frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 28px;
+  background: white;
+  border: 7px solid #7258c8;
+  box-shadow: 0 10px 22px rgba(44, 75, 94, .15);
+}
+
+.child-frame {
+  border-color: #f59a43;
+}
+
+.canvas-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fffef9;
+  touch-action: none;
+}
+
+.middle-divider {
+  display: grid;
+  place-items: center;
+}
+
+.turn-arrow {
+  display: grid;
+  place-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: white;
+  color: #6b43c7;
+  font-size: 2.3rem;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgba(44, 75, 94, .15);
+}
+
+.canvas-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-size: clamp(1.4rem, 2.2vw, 2.2rem);
+  font-weight: 900;
+}
+
+.canvas-message .message-icon {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+}
+
+.computer-message {
+  color: #573bb3;
+  background: rgba(255,255,255,.65);
+}
+
+.child-message {
+  color: #865d44;
+  background: rgba(255,255,255,.82);
+}
+
+.drawing-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 12px 22px;
+  background: white;
+  border-top: 5px solid #b8e5f3;
+  box-shadow: 0 -6px 18px rgba(42, 91, 116, .1);
+}
+
+.tool-group {
+  display: flex;
+  gap: 9px;
+}
+
+.tool-button {
+  min-width: 82px;
+  border: 3px solid #d7e5ea;
+  border-radius: 16px;
+  background: #f8fcfd;
+  padding: 7px 9px;
+  font-size: .72rem;
+  font-weight: 900;
+  color: #38536a;
+  cursor: pointer;
+}
+
+.tool-icon {
+  display: block;
+  font-size: 1.8rem;
+  margin-bottom: 2px;
+}
+
+.tool-button.active {
+  border-color: #6542bf;
+  background: #eee8ff;
+  color: #5533a6;
+  transform: translateY(-3px);
+}
+
+.color-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.color-button {
+  width: 39px;
+  height: 39px;
+  border: 4px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px #cbd8de, 0 4px 5px rgba(0,0,0,.12);
+}
+
+.color-button.active-color {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 4px #6140ba, 0 5px 7px rgba(0,0,0,.18);
+}
+
+.color-button.black { background: #263238; }
+.color-button.red { background: #ef5350; }
+.color-button.orange { background: #ff9800; }
+.color-button.yellow { background: #fdd835; }
+.color-button.green { background: #43a047; }
+.color-button.blue { background: #1e88e5; }
+.color-button.purple { background: #8e5ac8; }
+.color-button.pink { background: #ec6fa7; }
+
+.done-button {
+  min-width: 165px;
+  border: 0;
+  border-radius: 20px;
+  padding: 17px 20px;
+  background: #3fb85c;
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 900;
+  box-shadow: 0 7px 0 #27883f;
+  cursor: pointer;
+}
+
+.done-button span {
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
+.done-button:disabled {
+  background: #b7c8cc;
+  box-shadow: 0 7px 0 #8ea1a5;
+  cursor: default;
+  opacity: .75;
+}
+
+@media (max-width: 900px) {
+  .drawing-toolbar {
+    gap: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .tool-button {
+    min-width: 62px;
+    padding: 6px;
+  }
+
+  .tool-button span:last-child {
+    display: none;
+  }
+
+  .done-button {
+    min-width: 125px;
+    font-size: .95rem;
+  }
+}
+
+/* =========================================================
+   LARGER DRAWING AREA
+   ========================================================= */
+
+.drawing-studio {
+  grid-template-rows: 76px minmax(0, 1fr) 94px;
+}
+
+.studio-header {
+  grid-template-columns: 72px 1fr 95px;
+  padding: 6px 16px;
+}
+
+.back-button {
+  width: 54px;
+  height: 54px;
+  border-radius: 17px;
+  font-size: 2rem;
+}
+
+.studio-fish {
+  font-size: 2.5rem;
+}
+
+.studio-title h1 {
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+}
+
+.studio-title p {
+  font-size: .9rem;
+}
+
+.step-counter {
+  padding: 9px 14px;
+  font-size: 1.05rem;
+}
+
+.canvas-area {
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  padding: 10px 12px 8px;
+}
+
+.side-label {
+  margin-bottom: -15px;
+  padding: 7px 20px;
+  font-size: 1rem;
+}
+
+.canvas-frame {
+  border-width: 6px;
+  border-radius: 24px;
+}
+
+.turn-arrow {
+  width: 44px;
+  height: 44px;
+  font-size: 1.8rem;
+}
+
+.drawing-toolbar {
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  padding: 7px 12px;
+}
+
+.tool-group {
+  gap: 7px;
+}
+
+.tool-button {
+  min-width: 72px;
+  padding: 4px 7px;
+  border-radius: 14px;
+}
+
+.tool-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+}
+
+.color-group {
+  gap: 7px;
+}
+
+.color-button {
+  width: 34px;
+  height: 34px;
+}
+
+.done-button {
+  min-width: 150px;
+  padding: 13px 16px;
+  font-size: 1rem;
+}
+
+/* =========================================================
+   EXTRA-LARGE KINDERGARTEN DRAWING SPACE
+   ========================================================= */
+
+.drawing-studio {
+  grid-template-rows: 64px minmax(0, 1fr) 78px;
+}
+
+.studio-header {
+  grid-template-columns: 64px 1fr 88px;
+  padding: 4px 10px;
+  border-bottom-width: 4px;
+}
+
+.back-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  font-size: 1.8rem;
+}
+
+.studio-fish {
+  font-size: 2.1rem;
+}
+
+.studio-title {
+  gap: 8px;
+}
+
+.studio-title h1 {
+  font-size: clamp(1.2rem, 1.8vw, 1.75rem);
+}
+
+.studio-title p {
+  font-size: .82rem;
+}
+
+.step-counter {
+  padding: 8px 11px;
+  font-size: .95rem;
+  border-radius: 15px;
+}
+
+.canvas-area {
+  grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr);
+  padding: 4px 6px 5px;
+  gap: 0;
+}
+
+.side-label {
+  margin-bottom: -13px;
+  padding: 6px 16px;
+  font-size: .92rem;
+  border-radius: 16px;
+}
+
+.canvas-frame {
+  border-width: 5px;
+  border-radius: 20px;
+}
+
+.middle-divider {
+  padding: 0;
+}
+
+.turn-arrow {
+  width: 32px;
+  height: 32px;
+  font-size: 1.35rem;
+}
+
+.drawing-toolbar {
+  gap: 8px;
+  padding: 5px 8px;
+  border-top-width: 4px;
+}
+
+.tool-group {
+  gap: 5px;
+}
+
+.tool-button {
+  min-width: 66px;
+  padding: 2px 5px;
+  border-width: 2px;
+  border-radius: 12px;
+  font-size: .64rem;
+}
+
+.tool-icon {
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.color-group {
+  gap: 5px;
+}
+
+.color-button {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+}
+
+.done-button {
+  min-width: 135px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  font-size: .9rem;
+}
+
+.done-button span {
+  font-size: 1.2rem;
+}
+
+/* =========================================================
+   GUIDED DRAW ANIMATION
+   ========================================================= */
+
+.canvas-locked {
+  pointer-events: none;
+}
+
+.message-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.canvas-message {
+  transition:
+    opacity .25s ease,
+    visibility .25s ease,
+    transform .25s ease;
+}
+
+.turn-help {
+  display: block;
+  margin-top: 8px;
+  font-size: .48em;
+  color: #6e7780;
+}
+
+.your-turn-pop {
+  background: rgba(255, 250, 225, .94);
+  animation: yourTurnPulse .55s ease both;
+}
+
+.demo-pencil {
+  position: absolute;
+  z-index: 8;
+  font-size: 2.7rem;
+  line-height: 1;
+  pointer-events: none;
+  transform-origin: 12% 88%;
+  filter: drop-shadow(0 4px 3px rgba(0,0,0,.15));
+}
+
+@keyframes yourTurnPulse {
+  0% {
+    transform: scale(.88);
+    opacity: 0;
+  }
+
+  65% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   SKETCH / COLOR STAGES
+   ========================================================= */
+
+.tool-locked,
+.color-locked {
+  opacity: .28;
+  filter: grayscale(1);
+  cursor: default !important;
+  transform: none !important;
+}
+
+.color-celebration {
+  background: rgba(255, 248, 202, .96);
+  animation: colorPop .7s ease both;
+}
+
+.finished-message {
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,.96), rgba(255,241,174,.94));
+  color: #6540b8;
+}
+
+.finish-star {
+  animation: finishStar 1s ease-in-out infinite alternate;
+}
+
+@keyframes colorPop {
+  0% {
+    transform: scale(.75) rotate(-3deg);
+    opacity: 0;
+  }
+
+  65% {
+    transform: scale(1.06) rotate(1deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes finishStar {
+  from {
+    transform: scale(.9) rotate(-8deg);
+  }
+
+  to {
+    transform: scale(1.2) rotate(8deg);
+  }
+}
+
+/* =========================================================
+   CHILD DRAWING LAYERS
+   Outline always stays above coloring
+   ========================================================= */
+
+.child-canvas-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.child-canvas-stack .child-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.child-color-layer {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.child-line-layer {
+  z-index: 2;
+  background: transparent !important;
+}
