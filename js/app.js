@@ -5,12 +5,12 @@ document.querySelectorAll(".drawing-card").forEach((card) => {
     const drawing = card.dataset.drawing;
 
     if (drawing === "fish") {
-      openFishStudio();
+      openGuidedStudio("fish");
       return;
     }
 
     if (drawing === "flower") {
-      openBucketTestStudio();
+      openGuidedStudio("flower");
       return;
     }
 
@@ -18,7 +18,7 @@ document.querySelectorAll(".drawing-card").forEach((card) => {
   });
 });
 
-function openFishStudio() {
+function openGuidedStudio(drawingName = "fish") {
   document.body.classList.add("studio-mode");
 
   homeScreen.innerHTML = `
@@ -41,9 +41,15 @@ function openFishStudio() {
         </div>
 
         <div class="studio-title">
-          <span class="studio-fish">🐟</span>
+          <span class="studio-fish">${
+            drawingName === "flower" ? "🌼" : "🐟"
+          }</span>
           <div>
-            <h1>LET'S DRAW A FISH!</h1>
+            <h1>${
+              drawingName === "flower"
+                ? "LET'S DRAW A FLOWER!"
+                : "LET'S DRAW A FISH!"
+            }</h1>
             <p id="stepText">Step 1 • Watch me draw!</p>
           </div>
         </div>
@@ -189,6 +195,9 @@ function openFishStudio() {
   document.getElementById("skipButton").addEventListener("click", () => {
     GuidedDraw.skipCurrentDirections();
   });
+
+  GuidedDraw.selectedDrawing =
+    drawingName;
 
   setupDrawingCanvases();
 }

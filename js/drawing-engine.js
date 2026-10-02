@@ -227,6 +227,533 @@ const GuidedDraw = {
     }
   ],
 
+  async showCloseShapeLesson() {
+    const frame =
+      document.querySelector(
+        ".computer-side .canvas-frame"
+      );
+
+    if (!frame) {
+      return true;
+    }
+
+    const oldTip =
+      document.getElementById(
+        "closeShapeTip"
+      );
+
+    if (oldTip) {
+      oldTip.remove();
+    }
+
+    const tip =
+      document.createElement("div");
+
+    tip.id =
+      "closeShapeTip";
+
+    tip.className =
+      "close-shape-tip";
+
+    tip.innerHTML = `
+      <div class="close-shape-title">
+        CLOSE THE SHAPE!
+      </div>
+
+      <div class="close-shape-examples">
+
+        <div class="close-shape-example good">
+          <div class="shape-demo closed-shape"></div>
+          <div class="shape-result">
+            ✅ PAINT STAYS INSIDE
+          </div>
+        </div>
+
+        <div class="close-shape-example bad">
+          <div class="shape-demo open-shape"></div>
+          <div class="shape-result">
+            ❌ PAINT CAN SPILL OUT
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    frame.appendChild(tip);
+
+    await this.teach(
+      "Here is an important artist trick. When we want to use the Fill tool later, our shape has to be closed. That means the end of the line needs to touch the beginning."
+    );
+
+    if (
+      !this.directionSectionActive
+    ) {
+      tip.remove();
+      return false;
+    }
+
+    await this.teach(
+      "Look at the closed shape. There is no opening, so the paint stays inside. If we leave a gap, the paint can spill out through the opening."
+    );
+
+    await this.wait(700);
+
+    tip.classList.add(
+      "tip-fade"
+    );
+
+    await this.wait(350);
+
+    tip.remove();
+
+    return true;
+  },
+
+  flowerGeometry(w, h) {
+    const cx = w * 0.50;
+    const cy = h * 0.36;
+
+    const centerR =
+      Math.min(w, h) * 0.085;
+
+    const petalDistance =
+      Math.min(w, h) * 0.175;
+
+    const petalRx =
+      Math.min(w, h) * 0.062;
+
+    const petalRy =
+      Math.min(w, h) * 0.095;
+
+    const stemBottom =
+      h * 0.82;
+
+    return {
+      cx,
+      cy,
+      centerR,
+      petalDistance,
+      petalRx,
+      petalRy,
+      stemBottom
+    };
+  },
+
+  buildFlowerSteps() {
+    this.drawingSteps = [
+      {
+        watch:
+          "Little artist, we're starting with the middle of the flower. Watch carefully because I need to close my circle by bringing the line all the way back to where I started.",
+        turn:
+          "Your turn! Draw a big circle for the middle of your flower. Bring your line all the way back to where you started so there is no gap.",
+        short:
+          "Draw a closed circle for the flower's middle.",
+
+        paths: (w, h) => {
+          const g =
+            this.flowerGeometry(w, h);
+
+          return [
+            this.ellipsePath(
+              g.cx,
+              g.cy,
+              g.centerR,
+              g.centerR
+            )
+          ];
+        }
+      },
+
+      {
+        watch:
+          "Now I'm adding six big petals. Watch how every petal comes back and touches where it started so each petal is completely closed.",
+        turn:
+          "Your turn! Add big petals around your flower. Close every petal by making the end of your line touch the beginning.",
+        short:
+          "Add closed petals with no gaps.",
+
+        paths: (w, h) => {
+          const g =
+            this.flowerGeometry(w, h);
+
+          const paths = [];
+
+          for (let i = 0; i < 6; i++) {
+            const angle =
+              -Math.PI / 2 +
+              i * Math.PI / 3;
+
+            const px =
+              g.cx +
+              Math.cos(angle) *
+              g.petalDistance;
+
+            const py =
+              g.cy +
+              Math.sin(angle) *
+              g.petalDistance;
+
+            /*
+              Slightly simplified oval petals.
+              Kindergarten-friendly rather than botanical.
+            */
+            paths.push(
+              this.ellipsePath(
+                px,
+                py,
+                g.petalRx,
+                g.petalRy
+              )
+            );
+          }
+
+          return paths;
+        }
+      },
+
+      {
+        watch:
+          "Next, I'm drawing one long stem down from the flower.",
+        turn:
+          "Your turn! Draw a long stem down from your flower.",
+        short:
+          "Draw the stem.",
+
+        paths: (w, h) => {
+          const g =
+            this.flowerGeometry(w, h);
+
+          return [
+            this.polylinePath([
+              {
+                x: g.cx,
+                y:
+                  g.cy +
+                  g.centerR
+              },
+              {
+                x: g.cx,
+                y:
+                  g.stemBottom
+              }
+            ])
+          ];
+        }
+      },
+
+      {
+        watch:
+          "My flower needs leaves. I'm going to add one leaf on each side of the stem.",
+        turn:
+          "Your turn! Add two leaves to your stem.",
+        short:
+          "Add two leaves.",
+
+        paths: (w, h) => {
+          const g =
+            this.flowerGeometry(w, h);
+
+          const leftY =
+            h * 0.60;
+
+          const rightY =
+            h * 0.70;
+
+          return [
+            this.curvePath([
+              {
+                x: g.cx,
+                y: leftY
+              },
+              {
+                x: g.cx - w * 0.12,
+                y: leftY - h * 0.08
+              },
+              {
+                x: g.cx - w * 0.16,
+                y: leftY + h * 0.02
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx - w * 0.16,
+                y: leftY + h * 0.02
+              },
+              {
+                x: g.cx - w * 0.08,
+                y: leftY + h * 0.08
+              },
+              {
+                x: g.cx,
+                y: leftY
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx,
+                y: rightY
+              },
+              {
+                x: g.cx + w * 0.12,
+                y: rightY - h * 0.07
+              },
+              {
+                x: g.cx + w * 0.16,
+                y: rightY + h * 0.02
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx + w * 0.16,
+                y: rightY + h * 0.02
+              },
+              {
+                x: g.cx + w * 0.08,
+                y: rightY + h * 0.08
+              },
+              {
+                x: g.cx,
+                y: rightY
+              }
+            ])
+          ];
+        }
+      },
+
+      {
+        watch:
+          "Let's give our flower a happy face. I'm adding two eyes and a smile.",
+        turn:
+          "Your turn! Give your flower a happy face.",
+        short:
+          "Add two eyes and a smile.",
+
+        paths: (w, h) => {
+          const g =
+            this.flowerGeometry(w, h);
+
+          return [
+            this.ellipsePath(
+              g.cx - g.centerR * 0.35,
+              g.cy - g.centerR * 0.15,
+              g.centerR * 0.09,
+              g.centerR * 0.13
+            ),
+
+            this.ellipsePath(
+              g.cx + g.centerR * 0.35,
+              g.cy - g.centerR * 0.15,
+              g.centerR * 0.09,
+              g.centerR * 0.13
+            ),
+
+            this.curvePath([
+              {
+                x:
+                  g.cx -
+                  g.centerR * 0.38,
+                y:
+                  g.cy +
+                  g.centerR * 0.20
+              },
+              {
+                x: g.cx,
+                y:
+                  g.cy +
+                  g.centerR * 0.52
+              },
+              {
+                x:
+                  g.cx +
+                  g.centerR * 0.38,
+                y:
+                  g.cy +
+                  g.centerR * 0.20
+              }
+            ])
+          ];
+        }
+      }
+    ];
+  },
+
+  buildFlowerColorSteps() {
+    this.colorSteps = [
+      {
+        watch:
+          "Now I'm going to color the middle of the flower. This is a closed shape, so I can use the Fill tool.",
+        turn:
+          "Your turn! Use the Fill tool to color the middle of your flower.",
+        short:
+          "Fill the flower's middle.",
+        tool: "bucket",
+        color: "#fdd835",
+        size: null,
+        fillTargets(w, h) {
+          const g =
+            GuidedDraw.flowerGeometry(w, h);
+
+          return [
+            {
+              type: "ellipse",
+              x: g.cx,
+              y: g.cy,
+              rx: g.centerR - 6,
+              ry: g.centerR - 6
+            }
+          ];
+        }
+      },
+
+      {
+        watch:
+          "Next I'm going to fill the petals. Each petal is a closed shape, so I can use the Fill tool again.",
+        turn:
+          "Your turn! Fill your flower petals. You can choose any colors you like.",
+        short:
+          "Fill the petals.",
+        tool: "bucket",
+        color: "#ec6fa7",
+        size: null,
+        fillTargets(w, h) {
+          const g =
+            GuidedDraw.flowerGeometry(w, h);
+
+          const targets = [];
+
+          for (let i = 0; i < 6; i++) {
+            const angle =
+              -Math.PI / 2 +
+              i * Math.PI / 3;
+
+            targets.push({
+              type: "ellipse",
+              x:
+                g.cx +
+                Math.cos(angle) *
+                g.petalDistance,
+              y:
+                g.cy +
+                Math.sin(angle) *
+                g.petalDistance,
+              rx: g.petalRx - 5,
+              ry: g.petalRy - 5
+            });
+          }
+
+          return targets;
+        }
+      },
+
+      {
+        watch:
+          "Now I'm switching back to a crayon to color the stem and leaves.",
+        turn:
+          "Your turn! Use a crayon to color the stem and leaves.",
+        short:
+          "Color the stem and leaves.",
+        tool: "crayon",
+        color: "#43a047",
+        size: "medium",
+
+        strokes(w, h) {
+          const g =
+            GuidedDraw.flowerGeometry(w, h);
+
+          const strokes = [];
+
+          /*
+            Stem
+          */
+          for (let offset = -5; offset <= 5; offset += 5) {
+            strokes.push([
+              {
+                x: g.cx + offset,
+                y: g.cy + g.centerR + 8
+              },
+              {
+                x: g.cx + offset,
+                y: g.stemBottom - 5
+              }
+            ]);
+          }
+
+          /*
+            Left leaf
+          */
+          strokes.push([
+            {
+              x: g.cx - 4,
+              y: h * 0.60
+            },
+            {
+              x: g.cx - w * 0.07,
+              y: h * 0.59
+            },
+            {
+              x: g.cx - w * 0.13,
+              y: h * 0.61
+            }
+          ]);
+
+          strokes.push([
+            {
+              x: g.cx - 4,
+              y: h * 0.615
+            },
+            {
+              x: g.cx - w * 0.07,
+              y: h * 0.63
+            },
+            {
+              x: g.cx - w * 0.13,
+              y: h * 0.625
+            }
+          ]);
+
+          /*
+            Right leaf
+          */
+          strokes.push([
+            {
+              x: g.cx + 4,
+              y: h * 0.70
+            },
+            {
+              x: g.cx + w * 0.07,
+              y: h * 0.69
+            },
+            {
+              x: g.cx + w * 0.13,
+              y: h * 0.71
+            }
+          ]);
+
+          strokes.push([
+            {
+              x: g.cx + 4,
+              y: h * 0.715
+            },
+            {
+              x: g.cx + w * 0.07,
+              y: h * 0.73
+            },
+            {
+              x: g.cx + w * 0.13,
+              y: h * 0.725
+            }
+          ]);
+
+          return strokes;
+        }
+      }
+    ];
+  },
+
+
   start() {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -236,6 +763,13 @@ const GuidedDraw = {
 
     this.drawingStep = 0;
     this.colorStep = 0;
+
+    if (
+      this.selectedDrawing === "flower"
+    ) {
+      this.buildFlowerSteps();
+      this.buildFlowerColorSteps();
+    }
 
     this.childSelectedControls = {
       tool: null,
@@ -1176,12 +1710,16 @@ const GuidedDraw = {
 
     setTimeout(async () => {
       await this.demonstrateControls({
-        tool: "crayon",
-        size: step.size,
+        tool: step.tool || "crayon",
+        size: step.size || null,
         color: step.color
       });
 
-      if (step.size === "thick") {
+      if (step.tool === "bucket") {
+        await this.teach(
+          "Watch what happens when I click inside a closed shape. The Fill tool colors the whole inside at once."
+        );
+      } else if (step.size === "thick") {
         await this.teach(
           "Watch how I move my thick crayon back and forth to cover the white space while staying inside my lines."
         );
@@ -1199,6 +1737,123 @@ const GuidedDraw = {
     }, 500);
   },
 
+  animateBucketStep() {
+    const colorCanvas =
+      document.getElementById(
+        "computerColorCanvas"
+      );
+
+    const lineCanvas =
+      document.getElementById(
+        "computerCanvas"
+      );
+
+    const frame =
+      lineCanvas.closest(
+        ".canvas-frame"
+      );
+
+    const ctx =
+      colorCanvas.getContext("2d");
+
+    const step =
+      this.colorSteps[
+        this.colorStep
+      ];
+
+    const targets =
+      step.fillTargets(
+        colorCanvas.clientWidth,
+        colorCanvas.clientHeight
+      );
+
+    this.removeDemoTool();
+
+    const bucket =
+      document.createElement("div");
+
+    bucket.className =
+      "demo-crayon demo-bucket";
+
+    bucket.textContent = "🪣";
+
+    frame.appendChild(bucket);
+
+    this.demoTool = bucket;
+
+    let index = 0;
+
+    const fillNext = () => {
+      if (index >= targets.length) {
+        this.removeDemoTool();
+        this.finishColorWatch();
+        return;
+      }
+
+      const target =
+        targets[index];
+
+      bucket.style.left =
+        `${target.x}px`;
+
+      bucket.style.top =
+        `${target.y}px`;
+
+      setTimeout(() => {
+        ctx.save();
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle =
+          step.color;
+
+        if (
+          target.type === "ellipse"
+        ) {
+          ctx.beginPath();
+
+          ctx.ellipse(
+            target.x,
+            target.y,
+            Math.max(
+              1,
+              target.rx
+            ),
+            Math.max(
+              1,
+              target.ry
+            ),
+            0,
+            0,
+            Math.PI * 2
+          );
+
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        bucket.classList.add(
+          "bucket-pop"
+        );
+
+        setTimeout(() => {
+          bucket.classList.remove(
+            "bucket-pop"
+          );
+
+          index++;
+
+          setTimeout(
+            fillNext,
+            350
+          );
+        }, 250);
+      }, 550);
+    };
+
+    fillNext();
+  },
+
   animateColorStep() {
     const canvas =
       document.getElementById("computerColorCanvas");
@@ -1214,6 +1869,14 @@ const GuidedDraw = {
 
     const step =
       this.colorSteps[this.colorStep];
+
+    if (
+      step.tool === "bucket" &&
+      typeof step.fillTargets === "function"
+    ) {
+      this.animateBucketStep();
+      return;
+    }
 
     const strokes =
       step.strokes(
@@ -1287,8 +1950,13 @@ const GuidedDraw = {
     ).textContent =
       `Step ${stepNumber} • Your turn!`;
 
+    const turnIcon =
+      step.tool === "bucket"
+        ? "🪣"
+        : "🖍️";
+
     childMessage.innerHTML = `
-      <span class="message-icon">🖍️</span>
+      <span class="message-icon">${turnIcon}</span>
       <strong>YOUR TURN!</strong>
       <span class="turn-help">${step.short}</span>
     `;
@@ -1315,8 +1983,8 @@ const GuidedDraw = {
         when that control actually changes.
       */
       await this.prepareChildControls({
-        tool: "crayon",
-        size: step.size,
+        tool: step.tool || "crayon",
+        size: step.size || null,
         letChildChooseColor: true
       });
 
@@ -1346,8 +2014,13 @@ const GuidedDraw = {
     childCanvas.classList.add("canvas-locked");
     doneButton.disabled = true;
 
+    const drawingLabel =
+      this.selectedDrawing === "flower"
+        ? "Flower"
+        : "Fish";
+
     document.getElementById("stepText").textContent =
-      "Fish complete!";
+      `${drawingLabel} complete!`;
 
     document.getElementById("stepCounter").textContent =
       "★";
@@ -1355,14 +2028,14 @@ const GuidedDraw = {
     childMessage.innerHTML = `
       <span class="message-icon finish-star">🌟</span>
       <strong>AMAZING ARTIST!</strong>
-      <span class="turn-help">You drew and colored a fish!</span>
+      <span class="turn-help">You drew and colored a ${drawingLabel.toLowerCase()}!</span>
     `;
 
     childMessage.classList.remove("message-hidden");
     childMessage.classList.add("finished-message");
 
     this.setRepeatText(
-      "Amazing artist! You drew and colored a fish!"
+      `Amazing artist! You drew and colored a ${drawingLabel.toLowerCase()}!`
     );
 
     this.speak(
@@ -1381,24 +2054,30 @@ const GuidedDraw = {
     const lineCanvas =
       document.getElementById("childCanvas");
 
-    if (!colorCanvas || !lineCanvas) {
+    if (
+      !colorCanvas ||
+      !lineCanvas
+    ) {
       return null;
     }
 
     const merged =
       document.createElement("canvas");
 
-    merged.width = lineCanvas.width;
-    merged.height = lineCanvas.height;
+    merged.width =
+      lineCanvas.width;
+
+    merged.height =
+      lineCanvas.height;
 
     const ctx =
       merged.getContext("2d");
 
     /*
-      Give printed artwork a clean white paper background,
-      then place the child's coloring underneath the outline.
+      White paper first.
     */
     ctx.fillStyle = "#ffffff";
+
     ctx.fillRect(
       0,
       0,
@@ -1406,22 +2085,210 @@ const GuidedDraw = {
       merged.height
     );
 
+    /*
+      Color underneath.
+    */
     ctx.drawImage(
       colorCanvas,
       0,
       0
     );
 
+    /*
+      Pencil lines on top.
+    */
     ctx.drawImage(
       lineCanvas,
       0,
       0
     );
 
-    return merged.toDataURL(
+    /*
+      Find the actual artwork bounds.
+
+      A pixel counts as artwork if it is not
+      close to plain white.
+    */
+    const image =
+      ctx.getImageData(
+        0,
+        0,
+        merged.width,
+        merged.height
+      );
+
+    const data =
+      image.data;
+
+    let minX =
+      merged.width;
+
+    let minY =
+      merged.height;
+
+    let maxX = -1;
+    let maxY = -1;
+
+    for (
+      let y = 0;
+      y < merged.height;
+      y++
+    ) {
+      for (
+        let x = 0;
+        x < merged.width;
+        x++
+      ) {
+        const i =
+          (y * merged.width + x) * 4;
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const isWhite =
+          r > 246 &&
+          g > 246 &&
+          b > 246;
+
+        if (!isWhite) {
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+
+    /*
+      No artwork found: return the original.
+    */
+    if (
+      maxX < minX ||
+      maxY < minY
+    ) {
+      return merged.toDataURL(
+        "image/png"
+      );
+    }
+
+    const artWidth =
+      maxX - minX + 1;
+
+    const artHeight =
+      maxY - minY + 1;
+
+    /*
+      Give the masterpiece some white space
+      around the edges instead of cropping
+      directly against the drawing.
+    */
+    const padding =
+      Math.round(
+        Math.max(
+          artWidth,
+          artHeight
+        ) * 0.10
+      );
+
+    minX =
+      Math.max(
+        0,
+        minX - padding
+      );
+
+    minY =
+      Math.max(
+        0,
+        minY - padding
+      );
+
+    maxX =
+      Math.min(
+        merged.width - 1,
+        maxX + padding
+      );
+
+    maxY =
+      Math.min(
+        merged.height - 1,
+        maxY + padding
+      );
+
+    const cropWidth =
+      maxX - minX + 1;
+
+    const cropHeight =
+      maxY - minY + 1;
+
+    const cropped =
+      document.createElement(
+        "canvas"
+      );
+
+    /*
+      Use a pleasant landscape paper ratio.
+      The artwork gets centered and enlarged
+      without stretching.
+    */
+    cropped.width = 1200;
+    cropped.height = 760;
+
+    const cropCtx =
+      cropped.getContext("2d");
+
+    cropCtx.fillStyle =
+      "#ffffff";
+
+    cropCtx.fillRect(
+      0,
+      0,
+      cropped.width,
+      cropped.height
+    );
+
+    const availableWidth =
+      cropped.width * 0.88;
+
+    const availableHeight =
+      cropped.height * 0.84;
+
+    const scale =
+      Math.min(
+        availableWidth / cropWidth,
+        availableHeight / cropHeight
+      );
+
+    const drawWidth =
+      cropWidth * scale;
+
+    const drawHeight =
+      cropHeight * scale;
+
+    const drawX =
+      (cropped.width - drawWidth) / 2;
+
+    const drawY =
+      (cropped.height - drawHeight) / 2;
+
+    cropCtx.drawImage(
+      merged,
+      minX,
+      minY,
+      cropWidth,
+      cropHeight,
+      drawX,
+      drawY,
+      drawWidth,
+      drawHeight
+    );
+
+    return cropped.toDataURL(
       "image/png"
     );
   },
+
 
   showFinishedGallery() {
     const imageUrl =
