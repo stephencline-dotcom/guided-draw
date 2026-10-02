@@ -256,10 +256,6 @@ const GuidedDraw = {
     const myToken =
       this.directionToken;
 
-    /*
-      Once a direction sequence starts, Skip stays
-      available until finishDirectionSection() is called.
-    */
     this.directionSectionActive = true;
     this.currentRepeatText = text;
 
@@ -270,6 +266,10 @@ const GuidedDraw = {
 
     await this.speak(text);
 
+    /*
+      If Skip was pressed while speaking,
+      this direction block is no longer valid.
+    */
     if (
       myToken !== this.directionToken ||
       !this.directionSectionActive
@@ -286,24 +286,14 @@ const GuidedDraw = {
       return false;
     }
 
-    /*
-      DO NOT turn Skip off here.
-      More directions may still be coming.
-    */
-    return true;
-  },
-
-  finishDirectionSection() {
-    /*
-      We have reached the point where the directions
-      are finished and the child/computer can act.
-    */
     this.directionSectionActive = false;
 
     this.setDirectionButtons({
       skip: false,
-      repeat: Boolean(this.currentRepeatText)
+      repeat: true
     });
+
+    return true;
   },
 
 
@@ -579,8 +569,6 @@ const GuidedDraw = {
 
         await this.wait(250);
 
-        this.finishDirectionSection();
-
         toolButton.classList.add(
           "child-tool-waiting"
         );
@@ -651,8 +639,6 @@ const GuidedDraw = {
 
         await this.wait(250);
 
-        this.finishDirectionSection();
-
         sizeButton.classList.add(
           "child-tool-waiting"
         );
@@ -693,8 +679,6 @@ const GuidedDraw = {
         colorGroup &&
         colorButtons.length
       ) {
-        this.finishDirectionSection();
-
         colorGroup.classList.add(
           "child-choice-highlight"
         );
@@ -797,8 +781,7 @@ const GuidedDraw = {
       const allowed =
         button.dataset.tool === "crayon" ||
         button.dataset.tool === "marker" ||
-        button.dataset.tool === "eraser" ||
-        button.dataset.tool === "bucket";
+        button.dataset.tool === "eraser";
 
       button.disabled = !allowed;
       button.classList.toggle("tool-locked", !allowed);
@@ -1012,8 +995,6 @@ const GuidedDraw = {
       await this.playDirectionSection(
         direction
       );
-
-      this.finishDirectionSection();
 
       childCanvas.classList.remove(
         "canvas-locked"
@@ -1326,8 +1307,6 @@ const GuidedDraw = {
       await this.playDirectionSection(
         direction
       );
-
-      this.finishDirectionSection();
 
       childCanvas.classList.remove(
         "canvas-locked"
@@ -1832,13 +1811,22 @@ const GuidedDraw = {
 
   async playDirectionSection(text) {
     this.currentRepeatText = text;
+    this.directionSectionActive = true;
 
-    return await this.teach(
-      text,
-      250
-    );
+    this.setDirectionButtons({
+      skip: true,
+      repeat: false
+    });
+
+    await this.speak(text);
+
+    this.directionSectionActive = false;
+
+    this.setDirectionButtons({
+      skip: false,
+      repeat: true
+    });
   },
-
 
   skipCurrentDirections() {
     if (!this.directionSectionActive) {
