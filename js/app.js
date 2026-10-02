@@ -140,6 +140,17 @@ function openGuidedStudio(drawingName = "fish") {
             <span>ERASER</span>
           </button>
 
+          <button
+            class="undo-button"
+            id="undoButton"
+            type="button"
+            disabled
+            aria-label="Undo last mark"
+          >
+            <span class="tool-icon">↶</span>
+            <span>UNDO</span>
+          </button>
+
           <button class="tool-button" data-tool="bucket">
             <span class="tool-icon">🪣</span>
             <span>FILL</span>

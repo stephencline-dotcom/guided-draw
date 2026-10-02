@@ -331,6 +331,150 @@ function floodFillChildArtwork(
   return true;
 }
 
+let childUndoHistory = [];
+
+function updateChildUndoButton() {
+  const button =
+    document.getElementById("undoButton");
+
+  if (!button) return;
+
+  button.disabled =
+    childUndoHistory.length === 0;
+}
+
+function resetChildUndoHistory() {
+  childUndoHistory = [];
+  updateChildUndoButton();
+}
+
+function saveChildUndoState() {
+  const lineCanvas =
+    document.getElementById("childCanvas");
+
+  const colorCanvas =
+    document.getElementById("childColorCanvas");
+
+  if (
+    !lineCanvas ||
+    !colorCanvas
+  ) {
+    return;
+  }
+
+  const doneButton =
+    document.getElementById("doneButton");
+
+  const lineCtx =
+    lineCanvas.getContext("2d");
+
+  const colorCtx =
+    colorCanvas.getContext("2d");
+
+  childUndoHistory.push({
+    line:
+      lineCtx.getImageData(
+        0,
+        0,
+        lineCanvas.width,
+        lineCanvas.height
+      ),
+
+    color:
+      colorCtx.getImageData(
+        0,
+        0,
+        colorCanvas.width,
+        colorCanvas.height
+      ),
+
+    hasDrawn:
+      childDrawingState.hasDrawn,
+
+    doneDisabled:
+      doneButton
+        ? doneButton.disabled
+        : true,
+
+    doneReady:
+      doneButton
+        ? doneButton.classList.contains(
+            "done-ready"
+          )
+        : false
+  });
+
+  /*
+    Undo is meant for recent mistakes, not an
+    unlimited history. Keeping eight snapshots
+    also prevents large Chromebook canvases from
+    consuming too much memory.
+  */
+  if (childUndoHistory.length > 8) {
+    childUndoHistory.shift();
+  }
+
+  updateChildUndoButton();
+}
+
+function undoChildArtwork() {
+  if (!childUndoHistory.length) {
+    return;
+  }
+
+  const state =
+    childUndoHistory.pop();
+
+  const lineCanvas =
+    document.getElementById("childCanvas");
+
+  const colorCanvas =
+    document.getElementById("childColorCanvas");
+
+  if (
+    !lineCanvas ||
+    !colorCanvas
+  ) {
+    return;
+  }
+
+  lineCanvas
+    .getContext("2d")
+    .putImageData(
+      state.line,
+      0,
+      0
+    );
+
+  colorCanvas
+    .getContext("2d")
+    .putImageData(
+      state.color,
+      0,
+      0
+    );
+
+  childDrawingState.hasDrawn =
+    state.hasDrawn;
+
+  const doneButton =
+    document.getElementById(
+      "doneButton"
+    );
+
+  if (doneButton) {
+    doneButton.disabled =
+      state.doneDisabled;
+
+    doneButton.classList.toggle(
+      "done-ready",
+      state.doneReady
+    );
+  }
+
+  updateChildUndoButton();
+}
+
 function setupChildDrawing(lineCanvas, colorCanvas) {
   const lineCtx = lineCanvas.getContext("2d");
   const colorCtx = colorCanvas.getContext("2d");
@@ -372,6 +516,12 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
 
       const point =
         getPoint(event);
+
+      /*
+        Save the artwork before Fill. This is especially
+        important if paint escapes through an open shape.
+      */
+      saveChildUndoState();
 
       const filled =
         floodFillChildArtwork(
@@ -476,7 +626,11 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
     if (!childDrawingState.hasDrawn) {
       childDrawingState.hasDrawn = true;
 
-      const doneButton = document.getElementById("doneButton");
+      const doneButton =
+    document.getElementById("doneButton");
+
+  const undoButton =
+    document.getElementById("undoButton");
 
       if (doneButton) {
         doneButton.disabled = false;
@@ -535,6 +689,21 @@ function setupArtControls() {
   const colorButtons = document.querySelectorAll(".color-button");
   const sizeButtons = document.querySelectorAll(".size-button");
   const doneButton = document.getElementById("doneButton");
+
+  if (undoButton) {
+    undoButton.addEventListener(
+      "click",
+      () => {
+        if (undoButton.disabled) {
+          return;
+        }
+
+        undoChildArtwork();
+      }
+    );
+
+    updateChildUndoButton();
+  }
 
   toolButtons.forEach((button) => {
     button.addEventListener("click", () => {

@@ -2409,3 +2409,213 @@ body.studio-mode .home-screen {
       scale(1);
   }
 }
+
+/* =========================================================
+   UNDO
+   ========================================================= */
+
+.undo-button {
+  min-width: 68px;
+  height: 58px;
+
+  border: 3px solid #d8e4e8;
+  border-radius: 15px;
+
+  background: #f7fbfc;
+  color: #314d60;
+
+  font-weight: 900;
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 0 #bbcbd1;
+
+  transition:
+    transform .15s ease,
+    opacity .15s ease,
+    box-shadow .15s ease;
+}
+
+.undo-button .tool-icon {
+  display: block;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.undo-button:not(:disabled) {
+  background: #fff3a8;
+  border-color: #e2b42e;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 0 #bd8e14,
+    0 0 0 3px white;
+}
+
+.undo-button:not(:disabled):hover {
+  transform:
+    translateY(-2px)
+    scale(1.04);
+}
+
+.undo-button:not(:disabled):active {
+  transform: translateY(3px);
+
+  box-shadow:
+    0 2px 0 #bd8e14;
+}
+
+.undo-button:disabled {
+  opacity: .28;
+  filter: grayscale(1);
+  cursor: default;
+}
+
+.demo-eraser {
+  position: absolute;
+  z-index: 20;
+
+  font-size: 2.4rem;
+  line-height: 1;
+
+  pointer-events: none;
+
+  transform:
+    translate(-50%, -60%)
+    rotate(-18deg);
+
+  filter:
+    drop-shadow(
+      0 4px 3px
+      rgba(0,0,0,.18)
+    );
+}
+
+/* =========================================================
+   OPEN SHAPE — PAINT SPILLS THROUGH THE GAP
+   ========================================================= */
+
+.open-shape {
+  overflow: visible !important;
+}
+
+/*
+  Paint escaping through the opening.
+*/
+.open-shape::before {
+  content: "";
+
+  position: absolute;
+
+  right: -30px;
+  top: 43px;
+
+  width: 42px;
+  height: 22px;
+
+  background: #ec6fa7;
+
+  border-radius:
+    45% 55% 60% 40% /
+    55% 45% 55% 45%;
+
+  transform:
+    rotate(8deg)
+    scale(.85);
+
+  transform-origin: left center;
+
+  z-index: -1;
+
+  animation:
+    paintSpillWiggle
+    1.5s ease-in-out
+    infinite alternate;
+}
+
+/*
+  Existing paint symbol stays above the spill.
+*/
+.open-shape::after {
+  content: "🎨";
+
+  position: absolute;
+
+  right: -27px;
+  top: 28px;
+
+  z-index: 3;
+
+  font-size: 1.7rem;
+
+  transform: rotate(18deg);
+}
+
+/*
+  Small puddle underneath the escaped paint.
+*/
+.close-shape-example.bad {
+  position: relative;
+  overflow: visible;
+}
+
+.close-shape-example.bad::after {
+  content: "";
+
+  position: absolute;
+
+  width: 68px;
+  height: 19px;
+
+  left: 58%;
+  top: 101px;
+
+  background: #ec6fa7;
+
+  border-radius: 50%;
+
+  opacity: .82;
+
+  transform:
+    rotate(-4deg);
+
+  animation:
+    paintPuddlePulse
+    1.5s ease-in-out
+    infinite alternate;
+}
+
+@keyframes paintSpillWiggle {
+  from {
+    transform:
+      rotate(5deg)
+      scaleX(.72)
+      scaleY(.82);
+  }
+
+  to {
+    transform:
+      rotate(10deg)
+      scaleX(1.08)
+      scaleY(1);
+  }
+}
+
+@keyframes paintPuddlePulse {
+  from {
+    transform:
+      rotate(-4deg)
+      scale(.88);
+
+    opacity: .65;
+  }
+
+  to {
+    transform:
+      rotate(-4deg)
+      scale(1.08);
+
+    opacity: .9;
+  }
+}

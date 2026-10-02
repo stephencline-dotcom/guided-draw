@@ -309,6 +309,252 @@ const GuidedDraw = {
     return true;
   },
 
+  async showFishEraserLesson() {
+    const canvas =
+      document.getElementById("computerCanvas");
+
+    if (!canvas) {
+      return true;
+    }
+
+    const frame =
+      canvas.closest(".canvas-frame");
+
+    const ctx =
+      canvas.getContext("2d");
+
+    const w =
+      canvas.clientWidth;
+
+    const h =
+      canvas.clientHeight;
+
+    const introFinished =
+      await this.teach(
+        "Before we start, I want to show you something helpful. Sometimes artists make a mark they do not want. If that happens, we can use the eraser."
+      );
+
+    if (!introFinished) {
+      return false;
+    }
+
+    /*
+      Make sure Pencil is the active demonstration tool.
+    */
+    await this.demonstrateControls({
+      tool: "pencil"
+    });
+
+    /*
+      Draw a very obvious accidental zig-zag
+      in the upper-right corner.
+    */
+    const mistake = [
+      { x: w * 0.72, y: h * 0.17 },
+      { x: w * 0.77, y: h * 0.10 },
+      { x: w * 0.81, y: h * 0.20 },
+      { x: w * 0.85, y: h * 0.11 }
+    ];
+
+    this.removeDemoTool();
+
+    const pencil =
+      document.createElement("div");
+
+    pencil.className =
+      "demo-pencil";
+
+    pencil.textContent =
+      "✏️";
+
+    frame.appendChild(pencil);
+
+    this.demoTool =
+      pencil;
+
+    ctx.save();
+    ctx.globalCompositeOperation =
+      "source-over";
+    ctx.strokeStyle =
+      "#30343b";
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.beginPath();
+    ctx.moveTo(
+      mistake[0].x,
+      mistake[0].y
+    );
+
+    for (
+      let i = 1;
+      i < mistake.length;
+      i++
+    ) {
+      const from =
+        mistake[i - 1];
+
+      const to =
+        mistake[i];
+
+      const parts = 16;
+
+      for (
+        let j = 1;
+        j <= parts;
+        j++
+      ) {
+        const t =
+          j / parts;
+
+        const x =
+          from.x +
+          (to.x - from.x) * t;
+
+        const y =
+          from.y +
+          (to.y - from.y) * t;
+
+        pencil.style.left =
+          `${x}px`;
+
+        pencil.style.top =
+          `${y}px`;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        await this.wait(18);
+      }
+    }
+
+    ctx.restore();
+
+    /*
+      Pause so the child clearly sees
+      the mistake before it is erased.
+    */
+    await this.wait(650);
+
+    this.removeDemoTool();
+
+    const oopsFinished =
+      await this.teach(
+        "Oops! That is not where I wanted my line. Watch me choose the eraser and fix my mistake."
+      );
+
+    if (!oopsFinished) {
+      return false;
+    }
+
+    await this.demonstrateControls({
+      tool: "eraser"
+    });
+
+    this.removeDemoTool();
+
+    const eraser =
+      document.createElement("div");
+
+    eraser.className =
+      "demo-eraser";
+
+    eraser.textContent =
+      "🧽";
+
+    frame.appendChild(eraser);
+
+    this.demoTool =
+      eraser;
+
+    /*
+      Erase along the same zig-zag,
+      backwards.
+    */
+    for (
+      let i = mistake.length - 1;
+      i > 0;
+      i--
+    ) {
+      const from =
+        mistake[i];
+
+      const to =
+        mistake[i - 1];
+
+      const parts = 16;
+
+      for (
+        let j = 0;
+        j <= parts;
+        j++
+      ) {
+        const t =
+          j / parts;
+
+        const x =
+          from.x +
+          (to.x - from.x) * t;
+
+        const y =
+          from.y +
+          (to.y - from.y) * t;
+
+        eraser.style.left =
+          `${x}px`;
+
+        eraser.style.top =
+          `${y}px`;
+
+        ctx.clearRect(
+          x - 18,
+          y - 18,
+          36,
+          36
+        );
+
+        await this.wait(14);
+      }
+    }
+
+    /*
+      Final cleanup around the demo area only.
+    */
+    ctx.clearRect(
+      w * 0.68,
+      h * 0.05,
+      w * 0.22,
+      h * 0.22
+    );
+
+    await this.wait(350);
+
+    this.removeDemoTool();
+
+    const explainFinished =
+      await this.teach(
+        "There we go! You might not need the eraser, but if you make a mistake, choose Eraser and rub the mark away."
+      );
+
+    if (!explainFinished) {
+      return false;
+    }
+
+    /*
+      Return visibly to Pencil before
+      the real Fish drawing starts.
+    */
+    await this.demonstrateControls({
+      tool: "pencil"
+    });
+
+    await this.wait(300);
+
+    return true;
+  },
+
+
   flowerGeometry(w, h) {
     const cx = w * 0.50;
     const cy = h * 0.36;
@@ -1329,6 +1575,7 @@ const GuidedDraw = {
   setColorTools() {
     document.querySelectorAll(".tool-button").forEach((button) => {
       const allowed =
+        button.dataset.tool === "pencil" ||
         button.dataset.tool === "crayon" ||
         button.dataset.tool === "marker" ||
         button.dataset.tool === "eraser" ||
@@ -1368,10 +1615,15 @@ const GuidedDraw = {
     childDrawingState.drawing = false;
     childDrawingState.hasDrawn = false;
     childDrawingState.activeCtx = null;
+
+
   },
 
-  startDrawingWatch() {
-    const step = this.drawingSteps[this.drawingStep];
+  async startDrawingWatch() {
+    const step =
+      this.drawingSteps[
+        this.drawingStep
+      ];
 
     if (!step) {
       this.beginColoring();
@@ -1381,64 +1633,178 @@ const GuidedDraw = {
     this.phase = "draw-watch";
     this.prepareChildForWatch();
 
-    const childMessage = document.getElementById("childMessage");
-    const computerMessage = document.getElementById("computerMessage");
+    const childMessage =
+      document.getElementById(
+        "childMessage"
+      );
 
-    document.getElementById("stepText").textContent =
+    const computerMessage =
+      document.getElementById(
+        "computerMessage"
+      );
+
+    document.getElementById(
+      "stepText"
+    ).textContent =
       `Step ${this.drawingStep + 1} • Watch me draw!`;
 
-    document.getElementById("stepCounter").textContent =
+    document.getElementById(
+      "stepCounter"
+    ).textContent =
       `${this.drawingStep + 1} / 8`;
 
-    computerMessage.classList.add("message-hidden");
+    computerMessage.classList.add(
+      "message-hidden"
+    );
 
     childMessage.innerHTML = `
       <span class="message-icon">👀</span>
       <strong>WATCH!</strong>
     `;
 
-    childMessage.classList.remove("message-hidden");
+    childMessage.classList.remove(
+      "message-hidden"
+    );
 
-    this.currentRepeatText = step.watch;
+    /*
+      =====================================================
+      FLOWER STEP 1
+      Teach why closed shapes matter before drawing.
+      =====================================================
+    */
+    if (
+      this.selectedDrawing === "flower" &&
+      this.drawingStep === 0 &&
+      typeof this.showCloseShapeLesson ===
+        "function"
+    ) {
+      const closeLessonFinished =
+        await this.showCloseShapeLesson();
 
-    this.directionSectionActive = true;
-
-    this.setDirectionButtons({
-      skip: true,
-      repeat: false
-    });
-
-    this.speak(step.watch).then(() => {
-      if (!this.directionSectionActive) {
+      /*
+        If Skip was used, just continue into
+        the actual drawing demonstration.
+      */
+      if (!closeLessonFinished) {
+        this.finishDirectionSection();
+        this.animateDrawingStep();
         return;
       }
+    }
 
-      this.directionSectionActive = false;
+    /*
+      =====================================================
+      FISH STEP 1
+      Eraser lesson MUST completely finish before
+      anything about the Fish body begins.
+      =====================================================
+    */
+    if (
+      this.selectedDrawing === "fish" &&
+      this.drawingStep === 0 &&
+      typeof this.showFishEraserLesson ===
+        "function"
+    ) {
+      const eraserLessonFinished =
+        await this.showFishEraserLesson();
 
-      this.setDirectionButtons({
-        skip: false,
-        repeat: true
-      });
-    });
+      /*
+        If the child used Skip during this optional
+        lesson, go directly to the actual Fish demo.
+      */
+      if (!eraserLessonFinished) {
+        this.finishDirectionSection();
+        this.animateDrawingStep();
+        return;
+      }
+    }
 
-    setTimeout(async () => {
+    /*
+      =====================================================
+      NOW begin the real step.
+      Nothing above is running anymore.
+      =====================================================
+    */
+    const openingFinished =
+      await this.teach(
+        step.watch
+      );
+
+    if (!openingFinished) {
+      this.finishDirectionSection();
+      this.animateDrawingStep();
+      return;
+    }
+
+    /*
+      Make sure Pencil is selected.
+      If Fish Step 1 already returned to Pencil,
+      demonstrateControls() will simply do nothing.
+    */
+    const controlsFinished =
       await this.demonstrateControls({
         tool: "pencil"
       });
 
-      if (this.drawingStep === 0) {
-        await this.teach(
-          "Watch where my pencil starts. I'm going to move slowly around to make one big round shape for the fish's body."
-        );
+    if (!controlsFinished) {
+      this.finishDirectionSection();
+      this.animateDrawingStep();
+      return;
+    }
+
+    /*
+      Picture-specific Step 1 explanation.
+    */
+    if (this.drawingStep === 0) {
+
+      if (
+        this.selectedDrawing === "flower"
+      ) {
+        const techniqueFinished =
+          await this.teach(
+            "Watch where my pencil starts. I'm going to draw one big closed circle for the flower's center. I will bring my line all the way back to where I started so there is no gap."
+          );
+
+        if (!techniqueFinished) {
+          this.finishDirectionSection();
+          this.animateDrawingStep();
+          return;
+        }
+
       } else {
+        const techniqueFinished =
+          await this.teach(
+            "Watch where my pencil starts. I'm going to move slowly around to make one big round shape for the fish's body."
+          );
+
+        if (!techniqueFinished) {
+          this.finishDirectionSection();
+          this.animateDrawingStep();
+          return;
+        }
+      }
+
+    } else {
+      const techniqueFinished =
         await this.teach(
           "Watch carefully as I draw the next part."
         );
-      }
 
-      this.animateDrawingStep();
-    }, 500);
+      if (!techniqueFinished) {
+        this.finishDirectionSection();
+        this.animateDrawingStep();
+        return;
+      }
+    }
+
+    /*
+      All instructions are finished.
+      NOW the real drawing starts.
+    */
+    this.finishDirectionSection();
+    this.animateDrawingStep();
   },
+
 
   animateDrawingStep() {
     const canvas = document.getElementById("computerCanvas");
