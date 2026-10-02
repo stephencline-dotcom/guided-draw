@@ -452,6 +452,14 @@ const GuidedDraw = {
       tool: "eraser"
     });
 
+    /*
+      Keep Eraser visibly selected for the entire
+      computer erasing demonstration.
+    */
+    this.setComputerToolSelected(
+      "eraser"
+    );
+
     this.removeDemoTool();
 
     const eraser =
@@ -532,6 +540,11 @@ const GuidedDraw = {
 
     this.removeDemoTool();
 
+    /*
+      The computer is finished using Eraser now.
+    */
+    this.clearComputerToolSelected();
+
     const explainFinished =
       await this.teach(
         "There we go! You might not need the eraser, but if you make a mistake, choose Eraser and rub the mark away."
@@ -549,7 +562,13 @@ const GuidedDraw = {
       tool: "pencil"
     });
 
+    this.setComputerToolSelected(
+      "pencil"
+    );
+
     await this.wait(300);
+
+    this.clearComputerToolSelected();
 
     return true;
   },
@@ -583,6 +602,350 @@ const GuidedDraw = {
       petalRy,
       stemBottom
     };
+  },
+
+  catGeometry(w, h) {
+    /*
+      Big, simple kindergarten-friendly seated cat.
+    */
+    return {
+      cx: w * 0.50,
+
+      headCy: h * 0.29,
+      headRx: w * 0.15,
+      headRy: h * 0.17,
+
+      bodyCy: h * 0.67,
+      bodyRx: w * 0.18,
+      bodyRy: h * 0.24
+    };
+  },
+
+  buildCatSteps() {
+    this.drawingSteps = [
+
+      /*
+        STEP 1 — HEAD
+      */
+      {
+        watch:
+          "Little artist, let's start our cat with a big round head. Remember to bring your line all the way back to where you started so the shape is closed.",
+
+        turn:
+          "Your turn! Draw a big round head for your cat. Close the shape by bringing your line back to where you started.",
+
+        short:
+          "Draw the cat's round head.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          return [
+            this.ellipsePath(
+              g.cx,
+              g.headCy,
+              g.headRx,
+              g.headRy
+            )
+          ];
+        }
+      },
+
+      /*
+        STEP 2 — EARS
+      */
+      {
+        watch:
+          "Now our cat needs two pointy ears. Watch me use straight lines to make two closed triangles.",
+
+        turn:
+          "Your turn! Add two pointy triangle ears to your cat.",
+
+        short:
+          "Add two triangle ears.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          const y =
+            g.headCy - g.headRy * 0.72;
+
+          const tipY =
+            g.headCy - g.headRy * 1.52;
+
+          const leftOuter =
+            g.cx - g.headRx * 0.82;
+
+          const leftInner =
+            g.cx - g.headRx * 0.25;
+
+          const leftTip =
+            g.cx - g.headRx * 0.58;
+
+          const rightOuter =
+            g.cx + g.headRx * 0.82;
+
+          const rightInner =
+            g.cx + g.headRx * 0.25;
+
+          const rightTip =
+            g.cx + g.headRx * 0.58;
+
+          return [
+            this.polylinePath([
+              { x: leftOuter, y },
+              { x: leftTip, y: tipY },
+              { x: leftInner, y },
+              { x: leftOuter, y }
+            ]),
+
+            this.polylinePath([
+              { x: rightInner, y },
+              { x: rightTip, y: tipY },
+              { x: rightOuter, y },
+              { x: rightInner, y }
+            ])
+          ];
+        }
+      },
+
+      /*
+        STEP 3 — FACE
+      */
+      {
+        watch:
+          "Let's give our cat a face. I'm adding two eyes, a little triangle nose, and a happy mouth.",
+
+        turn:
+          "Your turn! Add two eyes, a little triangle nose, and a happy mouth.",
+
+        short:
+          "Draw the cat's face.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          const eyeY =
+            g.headCy - g.headRy * 0.18;
+
+          const eyeOffset =
+            g.headRx * 0.38;
+
+          const noseY =
+            g.headCy + g.headRy * 0.15;
+
+          const noseHalf =
+            w * 0.012;
+
+          return [
+            this.ellipsePath(
+              g.cx - eyeOffset,
+              eyeY,
+              w * 0.011,
+              h * 0.018
+            ),
+
+            this.ellipsePath(
+              g.cx + eyeOffset,
+              eyeY,
+              w * 0.011,
+              h * 0.018
+            ),
+
+            this.polylinePath([
+              {
+                x: g.cx - noseHalf,
+                y: noseY
+              },
+              {
+                x: g.cx + noseHalf,
+                y: noseY
+              },
+              {
+                x: g.cx,
+                y: noseY + h * 0.028
+              },
+              {
+                x: g.cx - noseHalf,
+                y: noseY
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx,
+                y: noseY + h * 0.028
+              },
+              {
+                x: g.cx - w * 0.025,
+                y: noseY + h * 0.075
+              },
+              {
+                x: g.cx - w * 0.055,
+                y: noseY + h * 0.045
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx,
+                y: noseY + h * 0.028
+              },
+              {
+                x: g.cx + w * 0.025,
+                y: noseY + h * 0.075
+              },
+              {
+                x: g.cx + w * 0.055,
+                y: noseY + h * 0.045
+              }
+            ])
+          ];
+        }
+      },
+
+      /*
+        STEP 4 — WHISKERS
+      */
+      {
+        watch:
+          "A cat needs whiskers. I'm adding three whiskers on each side of the face.",
+
+        turn:
+          "Your turn! Draw three whiskers on each side of your cat's face.",
+
+        short:
+          "Add the whiskers.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          const paths = [];
+
+          const ys = [
+            g.headCy + h * 0.025,
+            g.headCy + h * 0.065,
+            g.headCy + h * 0.105
+          ];
+
+          ys.forEach((y, i) => {
+            const tilt =
+              (i - 1) * h * 0.018;
+
+            paths.push(
+              this.polylinePath([
+                {
+                  x: g.cx - g.headRx * 0.58,
+                  y
+                },
+                {
+                  x: g.cx - g.headRx * 1.25,
+                  y: y + tilt
+                }
+              ])
+            );
+
+            paths.push(
+              this.polylinePath([
+                {
+                  x: g.cx + g.headRx * 0.58,
+                  y
+                },
+                {
+                  x: g.cx + g.headRx * 1.25,
+                  y: y + tilt
+                }
+              ])
+            );
+          });
+
+          return paths;
+        }
+      },
+
+      /*
+        STEP 5 — BODY
+      */
+      {
+        watch:
+          "Now I'm drawing a big round body under the head. I'm closing this shape too so we can color it later.",
+
+        turn:
+          "Your turn! Draw a big round body under your cat's head. Remember to close the shape.",
+
+        short:
+          "Draw the cat's round body.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          return [
+            this.ellipsePath(
+              g.cx,
+              g.bodyCy,
+              g.bodyRx,
+              g.bodyRy
+            )
+          ];
+        }
+      },
+
+      /*
+        STEP 6 — TAIL
+      */
+      {
+        watch:
+          "Last, our cat needs a big curvy tail. Watch me start beside the body and curl the tail upward.",
+
+        turn:
+          "Your turn! Give your cat a big curvy tail.",
+
+        short:
+          "Add a big curvy tail.",
+
+        paths: (w, h) => {
+          const g =
+            this.catGeometry(w, h);
+
+          return [
+            this.curvePath([
+              {
+                x: g.cx + g.bodyRx * 0.78,
+                y: g.bodyCy + g.bodyRy * 0.55
+              },
+              {
+                x: g.cx + w * 0.31,
+                y: g.bodyCy + h * 0.15
+              },
+              {
+                x: g.cx + w * 0.29,
+                y: g.bodyCy - h * 0.06
+              }
+            ]),
+
+            this.curvePath([
+              {
+                x: g.cx + w * 0.29,
+                y: g.bodyCy - h * 0.06
+              },
+              {
+                x: g.cx + w * 0.28,
+                y: g.bodyCy - h * 0.20
+              },
+              {
+                x: g.cx + g.bodyRx * 0.88,
+                y: g.bodyCy - g.bodyRy * 0.38
+              }
+            ])
+          ];
+        }
+      }
+    ];
   },
 
   buildFlowerSteps() {
@@ -826,6 +1189,241 @@ const GuidedDraw = {
     ];
   },
 
+  buildCatColorSteps() {
+    this.colorSteps = [
+
+      /*
+        COLOR 1 — HEAD
+      */
+      {
+        watch:
+          "Now we're ready to color our cat. The head is a closed shape, so I'm going to use the Fill tool.",
+
+        turn:
+          "Your turn! Use the Fill tool to color your cat's head. You can choose any color you like.",
+
+        short:
+          "Fill the cat's head.",
+
+        tool: "bucket",
+        color: "#ff9800",
+        size: null,
+
+        fillTargets(w, h) {
+          const g =
+            GuidedDraw.catGeometry(w, h);
+
+          return [
+            {
+              type: "ellipse",
+              x: g.cx,
+              y: g.headCy,
+              rx: g.headRx - 6,
+              ry: g.headRy - 6
+            }
+          ];
+        }
+      },
+
+      /*
+        COLOR 2 — EARS
+      */
+      {
+        watch:
+          "Now I'm going to color the cat's ears. The ears are closed triangle shapes, so I can use the Fill tool again.",
+
+        turn:
+          "Your turn! Use the Fill tool to color your cat's ears. You can choose any color you like.",
+
+        short:
+          "Fill the cat's ears.",
+
+        tool: "bucket",
+        color: "#ec6fa7",
+        size: null,
+
+        fillTargets(w, h) {
+          const g =
+            GuidedDraw.catGeometry(w, h);
+
+          const y =
+            g.headCy - g.headRy * 0.72;
+
+          const tipY =
+            g.headCy - g.headRy * 1.52;
+
+          const leftOuter =
+            g.cx - g.headRx * 0.82;
+
+          const leftInner =
+            g.cx - g.headRx * 0.25;
+
+          const leftTip =
+            g.cx - g.headRx * 0.58;
+
+          const rightOuter =
+            g.cx + g.headRx * 0.82;
+
+          const rightInner =
+            g.cx + g.headRx * 0.25;
+
+          const rightTip =
+            g.cx + g.headRx * 0.58;
+
+          return [
+            {
+              type: "polygon",
+              points: [
+                { x: leftOuter, y },
+                { x: leftTip, y: tipY },
+                { x: leftInner, y }
+              ]
+            },
+
+            {
+              type: "polygon",
+              points: [
+                { x: rightInner, y },
+                { x: rightTip, y: tipY },
+                { x: rightOuter, y }
+              ]
+            }
+          ];
+        }
+      },
+
+      /*
+        COLOR 3 — BODY
+      */
+      {
+        watch:
+          "Next I'm going to fill the cat's big round body. It is closed too, so the Fill tool works here.",
+
+        turn:
+          "Your turn! Fill your cat's body. You can use the same color or pick a new one.",
+
+        short:
+          "Fill the cat's body.",
+
+        tool: "bucket",
+        color: "#ff9800",
+        size: null,
+
+        fillTargets(w, h) {
+          const g =
+            GuidedDraw.catGeometry(w, h);
+
+          return [
+            {
+              type: "ellipse",
+              x: g.cx,
+              y: g.bodyCy,
+              rx: g.bodyRx - 6,
+              ry: g.bodyRy - 6
+            }
+          ];
+        }
+      },
+
+      /*
+        COLOR 4 — TAIL
+      */
+      {
+        watch:
+          "The tail is not a closed shape, so instead of Fill I'm going to switch to my crayon and color along the tail.",
+
+        turn:
+          "Your turn! Use your crayon to add color to the cat's tail.",
+
+        short:
+          "Color the cat's tail.",
+
+        tool: "crayon",
+        color: "#ff9800",
+        size: "medium",
+
+        strokes(w, h) {
+          const g =
+            GuidedDraw.catGeometry(w, h);
+
+          const strokes = [];
+
+          for (
+            let offset = -8;
+            offset <= 8;
+            offset += 5
+          ) {
+            strokes.push(
+              GuidedDraw.curvePath([
+                {
+                  x:
+                    g.cx +
+                    g.bodyRx * 0.78 +
+                    offset,
+                  y:
+                    g.bodyCy +
+                    g.bodyRy * 0.55
+                },
+                {
+                  x:
+                    g.cx +
+                    w * 0.31 +
+                    offset,
+                  y:
+                    g.bodyCy +
+                    h * 0.15
+                },
+                {
+                  x:
+                    g.cx +
+                    w * 0.29 +
+                    offset,
+                  y:
+                    g.bodyCy -
+                    h * 0.06
+                }
+              ])
+            );
+
+            strokes.push(
+              GuidedDraw.curvePath([
+                {
+                  x:
+                    g.cx +
+                    w * 0.29 +
+                    offset,
+                  y:
+                    g.bodyCy -
+                    h * 0.06
+                },
+                {
+                  x:
+                    g.cx +
+                    w * 0.28 +
+                    offset,
+                  y:
+                    g.bodyCy -
+                    h * 0.20
+                },
+                {
+                  x:
+                    g.cx +
+                    g.bodyRx * 0.88 +
+                    offset,
+                  y:
+                    g.bodyCy -
+                    g.bodyRy * 0.38
+                }
+              ])
+            );
+          }
+
+          return strokes;
+        }
+      }
+    ];
+  },
+
   buildFlowerColorSteps() {
     this.colorSteps = [
       {
@@ -1010,11 +1608,23 @@ const GuidedDraw = {
     this.drawingStep = 0;
     this.colorStep = 0;
 
+    /*
+      One-time tutorial for each new Flower artwork.
+    */
+    this.flowerUndoLessonShown = false;
+
     if (
       this.selectedDrawing === "flower"
     ) {
       this.buildFlowerSteps();
       this.buildFlowerColorSteps();
+    }
+
+    if (
+      this.selectedDrawing === "cat"
+    ) {
+      this.buildCatSteps();
+      this.buildCatColorSteps();
     }
 
     this.childSelectedControls = {
@@ -1084,8 +1694,47 @@ const GuidedDraw = {
       skip: false,
       repeat: Boolean(this.currentRepeatText)
     });
+
+    /*
+      CHILD'S TURN:
+      Restore Undo only if there is actually
+      something in the artwork history.
+    */
   },
 
+
+  setComputerToolSelected(tool) {
+    document.querySelectorAll(
+      ".tool-button"
+    ).forEach((button) => {
+      button.classList.remove(
+        "computer-tool-selected"
+      );
+    });
+
+    if (!tool) return;
+
+    const button =
+      document.querySelector(
+        `.tool-button[data-tool="${tool}"]`
+      );
+
+    if (button) {
+      button.classList.add(
+        "computer-tool-selected"
+      );
+    }
+  },
+
+  clearComputerToolSelected() {
+    document.querySelectorAll(
+      ".tool-button"
+    ).forEach((button) => {
+      button.classList.remove(
+        "computer-tool-selected"
+      );
+    });
+  },
 
   async demoTap(selector) {
     const myToken =
@@ -1570,6 +2219,13 @@ const GuidedDraw = {
 
     childDrawingState.tool = "pencil";
     childDrawingState.color = "#263238";
+
+    /*
+      Tool setup can happen while the computer
+      still owns the turn, so repair controls
+      remain locked until the canvas opens.
+    */
+    this.lockRepairControls();
   },
 
   setColorTools() {
@@ -1602,6 +2258,78 @@ const GuidedDraw = {
     childDrawingState.tool = "crayon";
     childDrawingState.size = "medium";
     childDrawingState.hasDrawn = false;
+
+    /*
+      Coloring tools may be prepared before
+      the child canvas is actually unlocked.
+    */
+    this.lockRepairControls();
+  },
+
+  lockRepairControls() {
+    const eraserButton =
+      document.querySelector(
+        '.tool-button[data-tool="eraser"]'
+      );
+
+    const undoButton =
+      document.getElementById(
+        "undoButton"
+      );
+
+    if (eraserButton) {
+      eraserButton.disabled = true;
+      eraserButton.classList.add(
+        "tool-locked"
+      );
+    }
+
+    if (undoButton) {
+      undoButton.disabled = true;
+      undoButton.classList.add(
+        "undo-watching"
+      );
+    }
+  },
+
+  unlockRepairControls() {
+    const eraserButton =
+      document.querySelector(
+        '.tool-button[data-tool="eraser"]'
+      );
+
+    const undoButton =
+      document.getElementById(
+        "undoButton"
+      );
+
+    /*
+      Eraser is always available whenever
+      the child's canvas is available.
+    */
+    if (eraserButton) {
+      eraserButton.disabled = false;
+      eraserButton.classList.remove(
+        "tool-locked"
+      );
+    }
+
+    /*
+      Undo is only available if there is
+      something in the history.
+    */
+    if (undoButton) {
+      undoButton.classList.remove(
+        "undo-watching"
+      );
+
+      if (
+        typeof updateChildUndoButton ===
+        "function"
+      ) {
+        updateChildUndoButton();
+      }
+    }
   },
 
   prepareChildForWatch() {
@@ -1611,6 +2339,21 @@ const GuidedDraw = {
     childCanvas.classList.add("canvas-locked");
     doneButton.disabled = true;
     doneButton.classList.remove("done-ready");
+
+    this.lockRepairControls();
+
+    /*
+      COMPUTER'S TURN:
+      Undo history is preserved, but the child
+      cannot use Undo while watching.
+    */
+    const undoButton =
+      document.getElementById("undoButton");
+
+    if (undoButton) {
+      undoButton.disabled = true;
+      undoButton.classList.add("undo-watching");
+    }
 
     childDrawingState.drawing = false;
     childDrawingState.hasDrawn = false;
@@ -1771,6 +2514,20 @@ const GuidedDraw = {
           return;
         }
 
+      } else if (
+        this.selectedDrawing === "cat"
+      ) {
+        const techniqueFinished =
+          await this.teach(
+            "Watch where my pencil starts. I'm going to slowly make one big round shape for the cat's head, and I will bring my line back to where I started."
+          );
+
+        if (!techniqueFinished) {
+          this.finishDirectionSection();
+          this.animateDrawingStep();
+          return;
+        }
+
       } else {
         const techniqueFinished =
           await this.teach(
@@ -1807,6 +2564,12 @@ const GuidedDraw = {
 
 
   animateDrawingStep() {
+    /*
+      COMPUTER IS DRAWING:
+      Child repair controls must stay locked.
+    */
+    this.lockRepairControls();
+
     const canvas = document.getElementById("computerCanvas");
     const frame = canvas.closest(".canvas-frame");
     const ctx = canvas.getContext("2d");
@@ -1918,6 +2681,8 @@ const GuidedDraw = {
       childCanvas.classList.remove(
         "canvas-locked"
       );
+
+      this.unlockRepairControls();
     }, 700);
   },
 
@@ -1976,6 +2741,16 @@ const GuidedDraw = {
 
   beginColoring() {
     this.colorStep = 0;
+
+    /*
+      While a new picture is being designed,
+      it may temporarily have drawing steps
+      but no coloring steps yet.
+    */
+    if (!this.colorSteps.length) {
+      this.finishArtwork();
+      return;
+    }
     this.setColorTools();
     this.phase = "color-intro";
 
@@ -2103,7 +2878,201 @@ const GuidedDraw = {
     }, 500);
   },
 
+  async demonstrateFlowerUndo({
+    ctx,
+    target,
+    color,
+    bucket
+  }) {
+    /*
+      This lesson runs only after the computer's
+      FIRST Flower center Fill.
+    */
+
+    const firstLineFinished =
+      await this.teach(
+        "Great! The Fill tool colored the whole middle at once."
+      );
+
+    if (!firstLineFinished) {
+      return false;
+    }
+
+    const undoIntroFinished =
+      await this.teach(
+        "But what if I don't like that color, or something goes wrong? I can use Undo!"
+      );
+
+    if (!undoIntroFinished) {
+      return false;
+    }
+
+    const undoButton =
+      document.getElementById(
+        "undoButton"
+      );
+
+    if (!undoButton) {
+      return true;
+    }
+
+    /*
+      Move the tutorial hand to Undo.
+
+      The button remains disabled to the child,
+      but we make it LOOK selected by the computer.
+    */
+    const hand =
+      document.querySelector(
+        ".tutorial-hand"
+      ) ||
+      document.createElement("div");
+
+    if (!hand.parentNode) {
+      hand.className =
+        "tutorial-hand";
+
+      hand.textContent =
+        "👆";
+
+      document.body.appendChild(
+        hand
+      );
+    }
+
+    const rect =
+      undoButton.getBoundingClientRect();
+
+    hand.classList.add(
+      "visible"
+    );
+
+    hand.style.left =
+      `${rect.left + rect.width / 2}px`;
+
+    hand.style.top =
+      `${rect.top + rect.height / 2 - 6}px`;
+
+    await this.wait(650);
+
+    undoButton.classList.add(
+      "computer-undo-selected"
+    );
+
+    hand.classList.add(
+      "tap"
+    );
+
+    await this.wait(300);
+
+    /*
+      COMPUTER UNDO:
+      Remove the Fill that was just demonstrated.
+
+      We only clear the center target on the
+      COMPUTER'S color canvas.
+    */
+    ctx.save();
+
+    ctx.globalCompositeOperation =
+      "destination-out";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      target.x,
+      target.y,
+      Math.max(1, target.rx + 2),
+      Math.max(1, target.ry + 2),
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.restore();
+
+    await this.wait(450);
+
+    hand.classList.remove(
+      "visible",
+      "tap"
+    );
+
+    undoButton.classList.remove(
+      "computer-undo-selected"
+    );
+
+    const explanationFinished =
+      await this.teach(
+        "Undo takes away the last thing I did. Now I can try again!"
+      );
+
+    if (!explanationFinished) {
+      return false;
+    }
+
+    /*
+      Show the bucket being used again.
+    */
+    bucket.style.left =
+      `${target.x}px`;
+
+    bucket.style.top =
+      `${target.y}px`;
+
+    await this.wait(450);
+
+    ctx.save();
+
+    ctx.globalCompositeOperation =
+      "source-over";
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = color;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      target.x,
+      target.y,
+      Math.max(1, target.rx),
+      Math.max(1, target.ry),
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.restore();
+
+    bucket.classList.add(
+      "bucket-pop"
+    );
+
+    await this.wait(250);
+
+    bucket.classList.remove(
+      "bucket-pop"
+    );
+
+    const finishFinished =
+      await this.teach(
+        "There we go! If something goes wrong while you're drawing or coloring, you can use Undo too."
+      );
+
+    return finishFinished;
+  },
+
   animateBucketStep() {
+    /*
+      COMPUTER IS USING FILL:
+      Child repair controls must stay locked.
+    */
+    this.lockRepairControls();
+
     const colorCanvas =
       document.getElementById(
         "computerColorCanvas"
@@ -2151,6 +3120,34 @@ const GuidedDraw = {
 
     const fillNext = () => {
       if (index >= targets.length) {
+        /*
+          FLOWER'S FIRST FILL:
+          Teach Undo once after the center has
+          been filled for the first time.
+        */
+        if (
+          this.selectedDrawing === "flower" &&
+          this.colorStep === 0 &&
+          !this.flowerUndoLessonShown
+        ) {
+          this.flowerUndoLessonShown = true;
+
+          const centerTarget =
+            targets[0];
+
+          this.demonstrateFlowerUndo({
+            ctx,
+            target: centerTarget,
+            color: step.color,
+            bucket
+          }).then(() => {
+            this.removeDemoTool();
+            this.finishColorWatch();
+          });
+
+          return;
+        }
+
         this.removeDemoTool();
         this.finishColorWatch();
         return;
@@ -2221,6 +3218,12 @@ const GuidedDraw = {
   },
 
   animateColorStep() {
+    /*
+      COMPUTER IS COLORING:
+      Child repair controls must stay locked.
+    */
+    this.lockRepairControls();
+
     const canvas =
       document.getElementById("computerColorCanvas");
 
@@ -2366,6 +3369,8 @@ const GuidedDraw = {
       childCanvas.classList.remove(
         "canvas-locked"
       );
+
+      this.unlockRepairControls();
     }, 700);
   },
 
@@ -2383,7 +3388,9 @@ const GuidedDraw = {
     const drawingLabel =
       this.selectedDrawing === "flower"
         ? "Flower"
-        : "Fish";
+        : this.selectedDrawing === "cat"
+          ? "Cat"
+          : "Fish";
 
     document.getElementById("stepText").textContent =
       `${drawingLabel} complete!`;
@@ -2405,7 +3412,7 @@ const GuidedDraw = {
     );
 
     this.speak(
-      "Amazing artist! You drew and colored a fish!"
+      `Amazing artist! You drew and colored a ${drawingLabel.toLowerCase()}!`
     );
 
     setTimeout(() => {

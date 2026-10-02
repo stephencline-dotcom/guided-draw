@@ -14,7 +14,12 @@ document.querySelectorAll(".drawing-card").forEach((card) => {
       return;
     }
 
-    alert("We will build this drawing after the Fish prototype!");
+    if (drawing === "cat") {
+      openGuidedStudio("cat");
+      return;
+    }
+
+    alert("This guided drawing is coming soon!");
   });
 });
 
@@ -42,13 +47,19 @@ function openGuidedStudio(drawingName = "fish") {
 
         <div class="studio-title">
           <span class="studio-fish">${
-            drawingName === "flower" ? "🌼" : "🐟"
+            drawingName === "flower"
+              ? "🌼"
+              : drawingName === "cat"
+                ? "🐱"
+                : "🐟"
           }</span>
           <div>
             <h1>${
               drawingName === "flower"
                 ? "LET'S DRAW A FLOWER!"
-                : "LET'S DRAW A FISH!"
+                : drawingName === "cat"
+                  ? "LET'S DRAW A CAT!"
+                  : "LET'S DRAW A FISH!"
             }</h1>
             <p id="stepText">Step 1 • Watch me draw!</p>
           </div>

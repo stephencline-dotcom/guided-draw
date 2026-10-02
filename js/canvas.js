@@ -410,7 +410,7 @@ function saveChildUndoState() {
     also prevents large Chromebook canvases from
     consuming too much memory.
   */
-  if (childUndoHistory.length > 8) {
+  if (childUndoHistory.length > 30) {
     childUndoHistory.shift();
   }
 
@@ -489,12 +489,20 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
   }
 
   function getActiveContext() {
+    /*
+      Pencil always draws on the TOP line layer.
+
+      Crayon and Marker always draw on the BOTTOM
+      color layer so the black drawing stays visible.
+
+      Eraser is handled specially during pointermove
+      because it must erase BOTH layers.
+    */
     if (
       GuidedDraw.phase === "color-child" &&
       (
         childDrawingState.tool === "crayon" ||
-        childDrawingState.tool === "marker" ||
-        childDrawingState.tool === "eraser"
+        childDrawingState.tool === "marker"
       )
     ) {
       return colorCtx;
@@ -502,6 +510,7 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
 
     return lineCtx;
   }
+
 
   lineCanvas.addEventListener("pointerdown", (event) => {
     if (
@@ -571,8 +580,21 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
     const point = getPoint(event);
     const ctx = getActiveContext();
 
+    /*
+      Save the artwork BEFORE the new stroke.
+      This makes Pencil, Eraser, Crayon and Marker
+      all undoable.
+    */
+    saveChildUndoState();
+
     childDrawingState.drawing = true;
     childDrawingState.activeCtx = ctx;
+
+    childDrawingState.lastX =
+      point.x;
+
+    childDrawingState.lastY =
+      point.y;
 
     ctx.beginPath();
     ctx.moveTo(point.x, point.y);
@@ -589,9 +611,43 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
     if (!ctx) return;
 
     if (childDrawingState.tool === "eraser") {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.globalAlpha = 1;
-      ctx.lineWidth = 30;
+      /*
+        Eraser removes BOTH the top pencil layer
+        and the bottom coloring layer.
+
+        That means a child can repair an old outline
+        even after coloring has begun.
+      */
+      const eraseLayer = (eraseCtx) => {
+        eraseCtx.save();
+
+        eraseCtx.globalCompositeOperation =
+          "destination-out";
+
+        eraseCtx.globalAlpha = 1;
+        eraseCtx.lineWidth = 30;
+        eraseCtx.lineCap = "round";
+        eraseCtx.lineJoin = "round";
+
+        eraseCtx.beginPath();
+
+        eraseCtx.moveTo(
+          childDrawingState.lastX,
+          childDrawingState.lastY
+        );
+
+        eraseCtx.lineTo(
+          point.x,
+          point.y
+        );
+
+        eraseCtx.stroke();
+        eraseCtx.restore();
+      };
+
+      eraseLayer(lineCtx);
+      eraseLayer(colorCtx);
+
     } else {
       ctx.globalCompositeOperation = "source-over";
       ctx.strokeStyle = childDrawingState.color;
@@ -620,8 +676,18 @@ function setupChildDrawing(lineCanvas, colorCanvas) {
       }
     }
 
-    ctx.lineTo(point.x, point.y);
-    ctx.stroke();
+    if (
+      childDrawingState.tool !== "eraser"
+    ) {
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+    }
+
+    childDrawingState.lastX =
+      point.x;
+
+    childDrawingState.lastY =
+      point.y;
 
     if (!childDrawingState.hasDrawn) {
       childDrawingState.hasDrawn = true;
