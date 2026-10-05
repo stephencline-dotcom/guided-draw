@@ -1230,21 +1230,23 @@ const GuidedDraw = {
       */
       {
         watch:
-          "Now I'm going to color the cat's ears. The ears are closed triangle shapes, so I can use the Fill tool again.",
+          "Now I'm going to color the cat's ears. Since the head line goes through the ears, I'm going to use my crayon so I can color the whole ear easily.",
 
         turn:
-          "Your turn! Use the Fill tool to color your cat's ears. You can choose any color you like.",
+          "Your turn! Use your crayon to color both of your cat's ears. You can choose any color you like.",
 
         short:
-          "Fill the cat's ears.",
+          "Color both ears with your crayon.",
 
-        tool: "bucket",
+        tool: "crayon",
         color: "#ec6fa7",
-        size: null,
+        size: "medium",
 
-        fillTargets(w, h) {
+        strokes(w, h) {
           const g =
             GuidedDraw.catGeometry(w, h);
+
+          const strokes = [];
 
           const y =
             g.headCy - g.headRy * 0.72;
@@ -1270,25 +1272,85 @@ const GuidedDraw = {
           const rightTip =
             g.cx + g.headRx * 0.58;
 
-          return [
-            {
-              type: "polygon",
-              points: [
-                { x: leftOuter, y },
-                { x: leftTip, y: tipY },
-                { x: leftInner, y }
-              ]
-            },
+          /*
+            Simple back-and-forth crayon strokes
+            inside each triangular ear.
+          */
+          const earStrokes = (
+            outer,
+            tip,
+            inner
+          ) => {
+            const count = 7;
 
-            {
-              type: "polygon",
-              points: [
-                { x: rightInner, y },
-                { x: rightTip, y: tipY },
-                { x: rightOuter, y }
-              ]
+            for (
+              let i = 1;
+              i < count;
+              i++
+            ) {
+              const t =
+                i / count;
+
+              const leftX =
+                tip.x +
+                (outer.x - tip.x) * t;
+
+              const leftY =
+                tip.y +
+                (outer.y - tip.y) * t;
+
+              const rightX =
+                tip.x +
+                (inner.x - tip.x) * t;
+
+              const rightY =
+                tip.y +
+                (inner.y - tip.y) * t;
+
+              strokes.push([
+                {
+                  x: leftX + 4,
+                  y: leftY
+                },
+                {
+                  x: rightX - 4,
+                  y: rightY
+                }
+              ]);
             }
-          ];
+          };
+
+          earStrokes(
+            {
+              x: leftOuter,
+              y
+            },
+            {
+              x: leftTip,
+              y: tipY
+            },
+            {
+              x: leftInner,
+              y
+            }
+          );
+
+          earStrokes(
+            {
+              x: rightInner,
+              y
+            },
+            {
+              x: rightTip,
+              y: tipY
+            },
+            {
+              x: rightOuter,
+              y
+            }
+          );
+
+          return strokes;
         }
       },
 
@@ -3190,6 +3252,37 @@ const GuidedDraw = {
             Math.PI * 2
           );
 
+          ctx.fill();
+        }
+
+        /*
+          Closed triangle/polygon shapes,
+          such as the Cat's ears.
+        */
+        if (
+          target.type === "polygon" &&
+          target.points &&
+          target.points.length >= 3
+        ) {
+          ctx.beginPath();
+
+          ctx.moveTo(
+            target.points[0].x,
+            target.points[0].y
+          );
+
+          for (
+            let i = 1;
+            i < target.points.length;
+            i++
+          ) {
+            ctx.lineTo(
+              target.points[i].x,
+              target.points[i].y
+            );
+          }
+
+          ctx.closePath();
           ctx.fill();
         }
 
