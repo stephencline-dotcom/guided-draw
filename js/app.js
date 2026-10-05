@@ -1,3 +1,67 @@
+/*
+  =========================================================
+  TRACKPAD / MOUSE ONLY MODE
+  =========================================================
+
+  Guided Draw is designed to practice mouse and trackpad
+  skills. Touchscreen input is intentionally ignored.
+
+  Mouse and trackpad input continue to work normally.
+*/
+
+function blockTouchscreenInput(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+}
+
+/*
+  Block native touch events. Preventing touchstart also
+  prevents Chrome from creating a synthetic mouse click
+  after a touchscreen tap.
+*/
+[
+  "touchstart",
+  "touchmove",
+  "touchend",
+  "touchcancel"
+].forEach((eventName) => {
+  document.addEventListener(
+    eventName,
+    blockTouchscreenInput,
+    {
+      capture: true,
+      passive: false
+    }
+  );
+});
+
+/*
+  The drawing system uses Pointer Events, so block
+  touchscreen pointers there as well.
+
+  Mouse/trackpad pointers are NOT blocked.
+*/
+[
+  "pointerdown",
+  "pointermove",
+  "pointerup",
+  "pointercancel"
+].forEach((eventName) => {
+  document.addEventListener(
+    eventName,
+    (event) => {
+      if (event.pointerType === "touch") {
+        blockTouchscreenInput(event);
+      }
+    },
+    {
+      capture: true,
+      passive: false
+    }
+  );
+});
+
 const homeScreen = document.querySelector(".home-screen");
 
 document.querySelectorAll(".drawing-card").forEach((card) => {

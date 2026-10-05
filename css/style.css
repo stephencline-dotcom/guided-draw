@@ -2737,3 +2737,13 @@ body.studio-mode .home-screen {
   pointer-events: none !important;
   cursor: default !important;
 }
+
+/* =========================================================
+   MOUSE / TRACKPAD ONLY
+   Prevent touchscreen gestures inside Guided Draw.
+   ========================================================= */
+
+html,
+body {
+  touch-action: none;
+}
